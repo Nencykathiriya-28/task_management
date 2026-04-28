@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #1e293b;
+  --primary: #5c59d9;
+  --primary-hover: #4a47b1;
+  --bg-sidebar: #e0e0f8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-bg-sidebar: var(--bg-sidebar);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.auth-sidebar {
+  flex: 1;
+  background-color: var(--bg-sidebar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .auth-sidebar {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+
+.fade-in { animation-name: fadeIn; }
+.zoom-in { animation-name: zoomIn; }
+.slide-in-from-right { animation-name: slideInRight; }
