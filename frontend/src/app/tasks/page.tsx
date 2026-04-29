@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/utils/api';
+import { io } from 'socket.io-client';
 
 interface UserData {
     _id: string;
@@ -90,6 +91,28 @@ const TasksContent = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, userRole, createParam]);
+
+    // Real-time updates
+    useEffect(() => {
+        if (!user) return;
+
+        const socketURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const socket = io(socketURL);
+
+        socket.on('taskUpdated', () => {
+            fetchTasks();
+        });
+
+        socket.on('userAdded', () => {
+            if (isAdmin) {
+                fetchUsers();
+            }
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [user, isAdmin]);
 
     const fetchTasks = async () => {
         try {

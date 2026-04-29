@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Task from '../models/Task.js';
 import User from '../models/User.js';
+import { getIO } from '../utils/socket.js';
 
 // @desc    Create new task
 // @route   POST /api/tasks
@@ -28,6 +29,8 @@ export const createTask = async (req, res, next) => {
             assignedBy: req.user.id,
             performedBy: req.user?.name || 'Admin'
         });
+
+        getIO().emit('taskUpdated');
 
         res.status(201).json({
             success: true,
@@ -141,6 +144,8 @@ export const updateTask = async (req, res, next) => {
             runValidators: true
         });
 
+        getIO().emit('taskUpdated');
+
         res.status(200).json({
             success: true,
             data: task
@@ -167,6 +172,8 @@ export const deleteTask = async (req, res, next) => {
         }
 
         await task.deleteOne();
+
+        getIO().emit('taskUpdated');
 
         res.status(200).json({
             success: true,

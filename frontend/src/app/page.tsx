@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { io } from 'socket.io-client';
 
 interface StatsData {
     total: number;
@@ -67,6 +68,25 @@ export default function Home() {
             if (user.role === 'user') {
                 fetchTasks();
             }
+
+            // Real-time updates
+            const socketURL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+            const socket = io(socketURL);
+
+            socket.on('taskUpdated', () => {
+                fetchStats();
+                if (user.role === 'user') {
+                    fetchTasks();
+                }
+            });
+
+            socket.on('userAdded', () => {
+                fetchStats();
+            });
+
+            return () => {
+                socket.disconnect();
+            };
         }
     }, [user, loading, router]);
 

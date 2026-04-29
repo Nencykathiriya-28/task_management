@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import sendEmail from '../utils/sendEmail.js';
+import { getIO } from '../utils/socket.js';
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -16,7 +17,14 @@ export const register = async (req, res, next) => {
             password,
             role: role || 'user',
         });
-
+        
+        getIO().emit('userAdded', {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+        });
+        
         sendTokenResponse(user, 201, res);
     } catch (err) {
         next(err);
