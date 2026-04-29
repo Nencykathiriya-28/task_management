@@ -1,11 +1,12 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const sendEmail = async (options) => {
     if (!process.env.RESEND_API_KEY) {
-        throw new Error('RESEND_API_KEY must be defined in environment variables');
+        console.warn('WARNING: RESEND_API_KEY is missing. Email will not be sent.');
+        return;
     }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
         console.log('Attempting to send email via Resend API...');
