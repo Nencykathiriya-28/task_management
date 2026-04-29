@@ -14,9 +14,10 @@ const sendEmail = async (options) => {
             user: process.env.SMTP_USER.trim(),
             pass: process.env.SMTP_PASS.trim(),
         },
-        connectionTimeout: 30000, // 30 seconds
+        connectionTimeout: 30000,
         greetingTimeout: 30000,
         socketTimeout: 30000,
+        family: 4 // Force IPv4 to avoid ENETUNREACH on IPv6
     });
 
     const message = {
