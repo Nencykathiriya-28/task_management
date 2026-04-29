@@ -129,12 +129,15 @@ export const getUsers = async (req, res, next) => {
 // @access  Public
 export const forgotPassword = async (req, res, next) => {
     try {
+        console.log(`Forgot password request for: ${req.body.email}`);
         const user = await User.findOne({ email: req.body.email });
 
         if (!user) {
+            console.log(`User not found: ${req.body.email}`);
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
+        console.log(`User found: ${user.name}. Generating OTP...`);
         // Generate 6 digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -142,6 +145,7 @@ export const forgotPassword = async (req, res, next) => {
         user.resetPasswordOTPExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
 
         await user.save();
+        console.log('OTP saved to user document.');
 
         const message = `Your password reset OTP is: ${otp}. It will expire in 10 minutes.`;
         const html = `
@@ -156,6 +160,7 @@ export const forgotPassword = async (req, res, next) => {
         `;
 
         try {
+            console.log(`Attempting to send OTP email to: ${user.email}`);
             await sendEmail({
                 email: user.email,
                 subject: 'Your Password Reset OTP — TaskDashboard',
@@ -171,7 +176,7 @@ export const forgotPassword = async (req, res, next) => {
 
             await user.save();
 
-            return res.status(500).json({ success: false, error: 'Email could not be sent' });
+            return res.status(500).json({ success: false, error: `Email error: ${err.message}` });
         }
     } catch (err) {
         next(err);
