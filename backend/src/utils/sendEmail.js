@@ -8,8 +8,8 @@ const sendEmail = async (options) => {
     // Create reusable transporter
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false, // true for 465, false for other ports
         auth: {
             user: process.env.SMTP_USER.trim(),
             pass: process.env.SMTP_PASS.trim(),
@@ -17,7 +17,7 @@ const sendEmail = async (options) => {
         connectionTimeout: 30000,
         greetingTimeout: 30000,
         socketTimeout: 30000,
-        family: 4 // Force IPv4 to avoid ENETUNREACH on IPv6
+        family: 4
     });
 
     const message = {
