@@ -1,28 +1,40 @@
-import * as Brevo from '@getbrevo/brevo';
-
 const sendEmail = async (options) => {
     if (!process.env.BREVO_API_KEY) {
         console.warn('WARNING: BREVO_API_KEY is missing. Email will not be sent.');
-        return;
+        throw new Error('BREVO_API_KEY is not configured');
     }
 
-    const apiInstance = new Brevo.TransactionalEmailsApi();
-    apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
-
-    const sendSmtpEmail = new Brevo.SendSmtpEmail();
-
-    sendSmtpEmail.subject = options.subject;
-    sendSmtpEmail.htmlContent = options.html || `<html><body><p>${options.message}</p></body></html>`;
-    sendSmtpEmail.sender = { name: "Task Dashboard", email: "nencykathiriya28@gmail.com" }; // Use your verified sender email here
-    sendSmtpEmail.to = [{ email: options.email }];
+    const payload = {
+        sender: { name: 'Task Dashboard', email: 'nencykathiriya28@gmail.com' },
+        to: [{ email: options.email }],
+        subject: options.subject,
+        htmlContent: options.html || `<p>${options.message}</p>`,
+    };
 
     try {
-        console.log('Attempting to send email via Brevo API...');
-        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-        console.log('Email sent successfully via Brevo:', data.body.messageId);
+        console.log('Sending email via Brevo API to:', options.email);
+
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('BREVO API ERROR:', data);
+            throw new Error(data.message || 'Failed to send email via Brevo');
+        }
+
+        console.log('Email sent successfully via Brevo! MessageId:', data.messageId);
         return data;
     } catch (err) {
-        console.error('CRITICAL BREVO ERROR:', err.response?.body || err.message);
+        console.error('CRITICAL EMAIL ERROR:', err.message);
         throw err;
     }
 };
