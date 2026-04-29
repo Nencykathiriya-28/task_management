@@ -1,47 +1,30 @@
-import nodemailer from 'nodemailer';
-import dns from 'dns';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (options) => {
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        throw new Error('SMTP_USER and SMTP_PASS must be defined in environment variables');
+    if (!process.env.RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY must be defined in environment variables');
     }
 
-    // Create reusable transporter
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, 
-        auth: {
-            user: process.env.SMTP_USER.trim(),
-            pass: process.env.SMTP_PASS.trim(),
-        },
-        connectionTimeout: 30000,
-        greetingTimeout: 30000,
-        socketTimeout: 30000,
-        // Force IPv4 using custom lookup
-        lookup: (hostname, options, callback) => {
-            dns.lookup(hostname, { family: 4 }, callback);
-        },
-        requireTLS: true,
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
-
-    const message = {
-        from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
-        html: options.html || `<p>${options.message}</p>`,
-    };
-
     try {
-        const info = await transporter.sendMail(message);
-        console.log('Email sent:', info.messageId);
-        return info;
+        console.log('Attempting to send email via Resend API...');
+        const { data, error } = await resend.emails.send({
+            from: 'TaskDashboard <onboarding@resend.dev>',
+            to: options.email,
+            subject: options.subject,
+            html: options.html || `<p>${options.message}</p>`,
+        });
+
+        if (error) {
+            console.error('RESEND API ERROR:', error);
+            throw new Error(error.message || 'Failed to send email via Resend');
+        }
+
+        console.log('Email sent successfully via Resend:', data.id);
+        return data;
     } catch (err) {
-        console.error('NODEMAILER ERROR:', err);
+        console.error('CRITICAL RESEND ERROR:', err.message);
         throw err;
     }
 };
