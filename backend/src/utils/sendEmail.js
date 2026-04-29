@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 
 const sendEmail = async (options) => {
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -17,7 +18,10 @@ const sendEmail = async (options) => {
         connectionTimeout: 30000,
         greetingTimeout: 30000,
         socketTimeout: 30000,
-        family: 4,
+        // Force IPv4 using custom lookup
+        lookup: (hostname, options, callback) => {
+            dns.lookup(hostname, { family: 4 }, callback);
+        },
         requireTLS: true,
         tls: {
             rejectUnauthorized: false
