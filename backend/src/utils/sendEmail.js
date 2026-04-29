@@ -1,31 +1,28 @@
-import { Resend } from 'resend';
+import * as Brevo from '@getbrevo/brevo';
 
 const sendEmail = async (options) => {
-    if (!process.env.RESEND_API_KEY) {
-        console.warn('WARNING: RESEND_API_KEY is missing. Email will not be sent.');
+    if (!process.env.BREVO_API_KEY) {
+        console.warn('WARNING: BREVO_API_KEY is missing. Email will not be sent.');
         return;
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const apiInstance = new Brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
+
+    sendSmtpEmail.subject = options.subject;
+    sendSmtpEmail.htmlContent = options.html || `<html><body><p>${options.message}</p></body></html>`;
+    sendSmtpEmail.sender = { name: "Task Dashboard", email: "nencykathiriya28@gmail.com" }; // Use your verified sender email here
+    sendSmtpEmail.to = [{ email: options.email }];
 
     try {
-        console.log('Attempting to send email via Resend API...');
-        const { data, error } = await resend.emails.send({
-            from: 'TaskDashboard <onboarding@resend.dev>',
-            to: options.email,
-            subject: options.subject,
-            html: options.html || `<p>${options.message}</p>`,
-        });
-
-        if (error) {
-            console.error('RESEND API ERROR:', error);
-            throw new Error(error.message || 'Failed to send email via Resend');
-        }
-
-        console.log('Email sent successfully via Resend:', data.id);
+        console.log('Attempting to send email via Brevo API...');
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('Email sent successfully via Brevo:', data.body.messageId);
         return data;
     } catch (err) {
-        console.error('CRITICAL RESEND ERROR:', err.message);
+        console.error('CRITICAL BREVO ERROR:', err.response?.body || err.message);
         throw err;
     }
 };
