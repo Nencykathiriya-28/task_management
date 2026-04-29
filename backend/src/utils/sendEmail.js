@@ -1,15 +1,19 @@
 import nodemailer from 'nodemailer';
 
 const sendEmail = async (options) => {
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        throw new Error('SMTP_USER and SMTP_PASS must be defined in environment variables');
+    }
+
     // Create reusable transporter
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // use SSL
+        service: 'gmail',
         auth: {
-            user: process.env.SMTP_USER?.trim(),
-            pass: process.env.SMTP_PASS?.trim(),
+            user: process.env.SMTP_USER.trim(),
+            pass: process.env.SMTP_PASS.trim(),
         },
+        debug: true, // Show debug output
+        logger: true // Log information in console
     });
 
     const message = {
