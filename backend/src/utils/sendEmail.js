@@ -7,13 +7,16 @@ const sendEmail = async (options) => {
 
     // Create reusable transporter
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.SMTP_USER.trim(),
             pass: process.env.SMTP_PASS.trim(),
         },
-        debug: true, // Show debug output
-        logger: true // Log information in console
+        connectionTimeout: 30000, // 30 seconds
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
     });
 
     const message = {

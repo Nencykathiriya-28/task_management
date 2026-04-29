@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
-    timeout: 15000, // 15 seconds
+    timeout: 60000, // 60 seconds
 });
 
 // Add a request interceptor to add the auth token to every request
