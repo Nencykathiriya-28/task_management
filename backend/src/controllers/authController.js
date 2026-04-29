@@ -170,13 +170,20 @@ export const forgotPassword = async (req, res, next) => {
 
             res.status(200).json({ success: true, data: 'Email sent' });
         } catch (err) {
-            console.error('EMAIL ERROR:', err.message);
+            console.error('--- CRITICAL EMAIL ERROR ---');
+            console.error(err);
+            console.error('-----------------------------');
+            
             user.resetPasswordOTP = undefined;
             user.resetPasswordOTPExpire = undefined;
-
             await user.save();
 
-            return res.status(500).json({ success: false, error: `Email error: ${err.message}` });
+            const errorMessage = err.message || JSON.stringify(err);
+            return res.status(500).json({ 
+                success: false, 
+                error: `Email error: ${errorMessage}`,
+                details: err
+            });
         }
     } catch (err) {
         next(err);
