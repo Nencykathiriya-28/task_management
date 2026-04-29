@@ -29,7 +29,9 @@ const ForgotPassword = () => {
             setMessage('OTP sent to your email. Please check your inbox.');
             setStep(2);
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to send OTP');
+            console.error('OTP Send Error:', err);
+            const errorMessage = err.response?.data?.error || err.message || 'Failed to send OTP';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
